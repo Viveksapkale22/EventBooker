@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Admin Dashboard</title>
+</head>
+<body class="bg-light">
+<div class="container mt-5">
+    
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-0 text-primary fw-bold">Admin Dashboard</h2>
+            <p class="text-muted">Manage all local events, bookings, and ratings.</p>
+        </div>
+        <div>
+            <a href="{{ url_for('admin.manage_event') }}" class="btn btn-primary shadow-sm me-2">+ Add New Event</a>
+            <a href="{{ url_for('admin.logout') }}" class="btn btn-outline-danger shadow-sm">Logout</a>
+        </div>
+    </div>
+   <br>
+    </div>
+    
+    <div class="card shadow border-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Event Info</th>
+                        <th>Location</th>
+                        <th>Date & Time</th>
+                        <th>Price</th>
+                        <th>Seats (Left/Total)</th>
+                        <th>Rating</th>
+                        <th class="text-end px-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for event in events %}
+                    <tr>
+                        <td>
+                            <strong>{{ event.name }}</strong><br>
+                            <small class="text-muted">{{ event.genre|join(', ') }}</small>
+                        </td>
+                        <td>
+                            {{ event.area }}, {{ event.city }}
+                        </td>
+                        <td>
+                            <span class="badge bg-light text-dark border">{{ event.date_time | replace('T', ' ') }}</span>
+                        </td>
+                        <td class="text-success fw-bold">₹{{ event.price }}</td>
+                        <td>
+                            <span class="badge bg-{{ 'success' if event.available_seats > 0 else 'danger' }}">
+                                {{ event.available_seats }} / {{ event.total_seats }}
+                            </span>
+                        </td>
+                        <td>
+                            ⭐ {{ event.rating }}
+                        </td>
+                        <td class="text-end px-3">
+                            <a href="{{ url_for('admin.manage_event', id=event._id) }}" class="btn btn-sm btn-outline-secondary">Edit</a>
+                            <a href="{{ url_for('admin.delete_event', id=event._id) }}" class="btn btn-sm btn-danger ms-1" onclick="return confirm('Are you sure you want to delete this event?')">Delete</a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center py-4 text-muted">No events found. Start by creating one!</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>

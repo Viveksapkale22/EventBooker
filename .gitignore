@@ -1,0 +1,27 @@
+# --- 🛡️ SECURITY & SECRETS ---
+secrets.json
+
+# --- 🐍 PYTHON & VIRTUAL ENVS ---
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# --- 📦 DATABASE & STORAGE ---
+# Ignore the FAISS vector database and uploaded PDFs
+backend_logic/storage/
+*.db
+*.sqlite
+*.faiss
+*.pkl
+
+# --- 🤖 MODEL CACHES ---
+.ollama/
+.cache/
+
+# --- 🖥️ OS SPECIFIC ---
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Checkout - {{ event.name }}</title>
+</head>
+<body class="bg-light">
+
+<nav class="navbar navbar-dark bg-primary mb-5 shadow-sm">
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="/">← Back to Events</a>
+  </div>
+</nav>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                {% for category, message in messages %}
+                  <div class="alert alert-{{ category }} shadow-sm">{{ message }}</div>
+                {% endfor %}
+              {% endif %}
+            {% endwith %}
+
+            <div class="card shadow border-0 overflow-hidden">
+                <div class="row g-0">
+                    <div class="col-md-5">
+                        <img src="{{ event.image_url }}" class="img-fluid h-100 w-100" style="object-fit: cover;" alt="Event Image">
+                    </div>
+                    
+                    <div class="col-md-7">
+                        <div class="card-body p-4">
+                            <h3 class="fw-bold mb-1">{{ event.name }}</h3>
+                            <p class="text-muted mb-3"><i class="bi bi-geo-alt"></i> {{ event.location }}, {{ event.area }}</p>
+                            
+                            <div class="d-flex justify-content-between border-bottom pb-3 mb-3">
+                                <div>
+                                    <small class="text-muted d-block">Date & Time</small>
+                                    <strong>{{ event.date_time | replace('T', ' ') }}</strong>
+                                </div>
+                                <div class="text-end">
+                                    <small class="text-muted d-block">Price per Ticket</small>
+                                    <strong class="text-success fs-5" id="basePrice" data-price="{{ event.price }}">₹{{ event.price }}</strong>
+                                </div>
+                            </div>
+
+                            <form action="{{ url_for('auth.book_event', event_id=event._id) }}" method="POST">
+                                <div class="mb-4">
+                                    <label class="form-label fw-bold">Select Number of Tickets</label>
+                                    <div class="d-flex align-items-center">
+                                        <input type="number" id="ticketQuantity" name="quantity" class="form-control form-control-lg w-50 fw-bold" 
+                                               value="1" min="1" max="{{ [10, event.available_seats]|min }}" required>
+                                        <span class="ms-3 text-muted">Max: {{ [10, event.available_seats]|min }} tickets</span>
+                                    </div>
+                                </div>
+
+                                <div class="bg-light p-3 rounded mb-4 d-flex justify-content-between align-items-center">
+                                    <span class="fw-bold fs-5">Total to Pay:</span>
+                                    <span class="fw-bold fs-3 text-primary" id="totalPriceDisplay">₹{{ event.price }}</span>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary btn-lg w-100 fw-bold shadow-sm">Confirm & Pay</button>
+                            </form>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+<script>
+    const quantityInput = document.getElementById('ticketQuantity');
+    const basePrice = parseFloat(document.getElementById('basePrice').getAttribute('data-price'));
+    const totalDisplay = document.getElementById('totalPriceDisplay');
+
+    quantityInput.addEventListener('input', function() {
+        // Get current quantity, default to 1 if empty or weird
+        let qty = parseInt(this.value) || 1; 
+        
+        // Ensure they can't type a number higher than the max allowed
+        let maxAllowed = parseInt(this.getAttribute('max'));
+        if (qty > maxAllowed) {
+            qty = maxAllowed;
+            this.value = maxAllowed;
+        }
+
+        // Calculate and update text
+        let total = (basePrice * qty).toFixed(2);
+        totalDisplay.innerText = '₹' + total;
+    });
+</script>
+
+</body>
+</html>

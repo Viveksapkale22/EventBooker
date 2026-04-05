@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>My Profile</title>
+</head>
+<body class="bg-light">
+
+<nav class="navbar navbar-dark bg-primary mb-4 shadow-sm">
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="/">← Back to Events</a>
+    <a class="btn btn-danger btn-sm shadow-sm" href="{{ url_for('auth.logout') }}">Logout</a>
+  </div>
+</nav>
+
+<div class="container mb-5">
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} shadow-sm">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-body text-center p-4">
+                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 80px; height: 80px; font-size: 32px;">
+                        {{ user.name[0]|upper }}
+                    </div>
+                    <h4 class="fw-bold mb-0">{{ user.name }}</h4>
+                    <p class="text-muted">{{ user.email }}</p>
+                    <hr>
+                    <h6 class="text-start fw-bold text-primary">Your Favorite Genres:</h6>
+                    <div class="d-flex flex-wrap gap-1 mt-2">
+                        {% for g in user.favorite_genres %}
+                            <span class="badge bg-secondary">{{ g }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <h3 class="mb-4 fw-bold">My Ticket History</h3>
+            
+            {% for b in bookings %}
+            <div class="card shadow-sm border-0 mb-3 {% if b.status == 'Cancelled' %}bg-light opacity-75{% endif %}">
+                <div class="card-body d-flex justify-content-between align-items-center p-4">
+                    <div>
+                        <h5 class="mb-1 fw-bold">{{ b.event_name }}</h5>
+<p class="mb-1 text-muted">Event Date: <span class="badge bg-light text-dark border">{{ b.event_date | replace('T', ' ') }}</span></p>
+<p class="mb-2">
+    <span class="badge bg-primary me-1">{{ b.quantity }} Ticket(s)</span>
+    <span class="badge bg-success">Paid: ₹{{ b.total_price }}</span>
+</p>
+<small class="text-secondary">Ticket ID: <strong>{{ b._id }}</strong></small>
+                    </div>
+                    <div class="text-end">
+                        {% if b.status == 'Cancelled' %}
+                            <span class="badge bg-danger fs-6">Cancelled</span>
+                        {% else %}
+                            <span class="badge bg-success mb-2 fs-6">Active</span><br>
+                            {% if b.can_cancel %}
+                                <form action="{{ url_for('auth.cancel_booking', booking_id=b._id) }}" method="POST">
+                                    <button class="btn btn-outline-danger btn-sm fw-bold mt-2" onclick="return confirm('Cancel ticket? Your seat will be released. This cannot be undone.')">Cancel Ticket</button>
+                                </form>
+                            {% else %}
+                                <small class="text-danger d-block mt-2 fw-bold" style="max-width: 150px; font-size: 12px;">Locked (Starts in < 24 hrs)</small>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% else %}
+                <div class="text-center mt-5 p-5 bg-white rounded shadow-sm">
+                    <h5 class="text-muted">You haven't booked any events yet.</h5>
+                    <a href="/" class="btn btn-primary mt-3">Browse Events</a>
+                </div>
+            {% endfor %}
+            
+        </div>
+    </div>
+</div>
+</body>
+</html>

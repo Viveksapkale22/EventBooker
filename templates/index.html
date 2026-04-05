@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Event Booker - Discover Experiences</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <style>
+        /* The Parallax Effect */
+        .parallax-hero {
+            /* Uses a high-quality crowd/event image from Unsplash */
+            background-image: linear-gradient(rgba(10, 20, 40, 0.7), rgba(10, 20, 40, 0.8)), url('https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=1600&q=80');
+            height: 60vh; /* Takes up 60% of the screen height */
+            background-attachment: fixed; /* THIS creates the parallax effect! */
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-align: center;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            transition: transform 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-light">
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow-sm py-3">
+  <div class="container">
+    <a class="navbar-brand fw-bold fs-4 text-primary" href="/">🎟️ EventBooker</a>
+    <div class="ms-auto d-flex gap-3 align-items-center">
+        <a href="{{ url_for('search.search_events') }}" class="btn btn-light btn-sm px-3 shadow-sm fw-bold"><i class="bi bi-search"></i> Explore</a>
+        {% if session.get('user_id') %}
+            <span class="navbar-text text-light fw-bold">Hi, {{ session.get('user_name') }}!</span>
+            <a href="{{ url_for('auth.profile') }}" class="btn btn-primary btn-sm px-3 fw-bold shadow-sm">My Tickets</a>
+            <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-light btn-sm">Logout</a>
+        {% else %}
+            <a href="{{ url_for('auth.login') }}" class="btn btn-primary px-4 shadow-sm fw-bold">Login / Register</a>
+        {% endif %}
+        <a href="/admin" class="btn btn-outline-secondary btn-sm ms-2">Admin</a>
+    </div>
+  </div>
+</nav>
+
+<div class="parallax-hero shadow-lg mb-5">
+    <div class="container px-4 px-lg-5">
+        <h1 class="display-3 fw-bold text-white mb-3">Discover the Best Local Events</h1>
+        <p class="lead text-white-50 mb-4 fs-4">Music, Tech, Food, and more. Find your next unforgettable experience in Maharashtra.</p>
+        {% if not session.get('user_id') %}
+            <a class="btn btn-primary btn-lg fw-bold px-5 py-3 shadow" href="{{ url_for('auth.register') }}">Get Started Today</a>
+        {% else %}
+            <a class="btn btn-primary btn-lg fw-bold px-5 py-3 shadow" href="#recommendations">See Your Matches ↓</a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="container pb-5">
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} shadow-sm fw-bold">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+  {% if genre_events %}
+    <div class="p-4 mb-5 bg-white rounded shadow-sm border-top border-primary border-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 class="text-primary fw-bold mb-0"><i class="bi bi-heart-fill"></i> Based on Your Interests</h3>
+            <span class="badge bg-primary fs-6">Profile Match</span>
+        </div>
+        <div class="row row-cols-1 row-cols-md-3 row-cols-lg-5 g-3">
+            {% for event in genre_events %}
+                {% include 'partials/event_card.html' %} 
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if history_events %}
+    <div class="p-4 mb-5 bg-white rounded shadow-sm border-top border-success border-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 class="text-success fw-bold mb-0"><i class="bi bi-stars"></i> Inspired by Your Bookings</h3>
+            <span class="badge bg-success fs-6">AI Powered</span>
+        </div>
+        <div class="row row-cols-1 row-cols-md-3 row-cols-lg-5 g-3">
+            {% for event in history_events %}
+                {% include 'partials/event_card.html' %} 
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <h3 class="mb-4 fw-bold">Explore More Events</h3>
+    <div class="row">
+        {% for event in events %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm border-0 rounded-3 overflow-hidden">
+                <div class="position-relative">
+                    <img src="{{ event.image_url }}" class="card-img-top" style="height: 220px; object-fit: cover;">
+                    <div class="position-absolute top-0 end-0 m-2">
+                        <span class="badge bg-dark fs-6 shadow-sm">⭐ {{ event.rating }}</span>
+                    </div>
+                </div>
+                
+                <div class="card-body p-4">
+                    <h5 class="card-title text-truncate fw-bold">{{ event.name }}</h5>
+                    <p class="text-muted small mb-1"><i class="bi bi-geo-alt-fill text-danger"></i> {{ event.location }}, {{ event.area }}</p>
+                    <p class="text-muted small mb-3 fw-bold text-primary"><i class="bi bi-tags-fill"></i> {{ event.genre|join(', ') }}</p>
+                    <p class="card-text text-truncate text-secondary">{{ event.description }}</p>
+                    <hr>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="fw-bold fs-4 text-success">₹{{ event.price }}</span>
+                        <span class="badge bg-{{ 'success' if event.available_seats > 0 else 'danger' }} p-2">
+                            {{ event.available_seats }} Seats Left
+                        </span>
+                    </div>
+                </div>
+                <div class="card-footer bg-white border-0 pb-4 pt-0 px-4">
+                    <a href="{{ url_for('auth.checkout', event_id=event._id) }}" class="btn btn-outline-primary btn-lg w-100 fw-bold shadow-sm {% if event.available_seats <= 0 %}disabled{% endif %}">
+                        {{ 'Secure Your Tickets' if event.available_seats > 0 else 'Sold Out' }}
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+<footer class="bg-dark text-white pt-5 pb-4 mt-5 border-top border-primary border-5">
+    <div class="container text-center text-md-start">
+        <div class="row text-center text-md-start">
+            
+            <div class="col-md-4 col-lg-4 col-xl-4 mx-auto mt-3">
+                <h5 class="text-uppercase mb-4 fw-bold text-primary">🎟️ EventBooker</h5>
+                <p>The ultimate platform to discover, book, and experience the best local events, workshops, and concerts in Maharashtra.</p>
+            </div>
+
+            <div class="col-md-3 col-lg-2 col-xl-2 mx-auto mt-3">
+                <h5 class="text-uppercase mb-4 fw-bold text-primary">Quick Links</h5>
+                <p><a href="/" class="text-white text-decoration-none">Home</a></p>
+                <p><a href="/register" class="text-white text-decoration-none">Create Account</a></p>
+                <p><a href="/login" class="text-white text-decoration-none">User Login</a></p>
+            </div>
+
+            <div class="col-md-4 col-lg-3 col-xl-3 mx-auto mt-3">
+                <h5 class="text-uppercase mb-4 fw-bold text-primary">Contact Us</h5>
+                <p><i class="bi bi-house-door-fill me-2"></i> Virar West, Maharashtra, India</p>
+                <p><i class="bi bi-envelope-fill me-2"></i> support@eventbooker.in</p>
+                <p><i class="bi bi-telephone-fill me-2"></i> +91 98765 43210</p>
+            </div>
+            
+        </div>
+        <hr class="mb-4">
+        <div class="row align-items-center">
+            <div class="col-md-7 col-lg-8">
+                <p class="text-white-50">© 2026 Copyright EventBooker | Developed for Demonstration</p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+</body>
+</html>

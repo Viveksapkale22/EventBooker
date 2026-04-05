@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ 'Edit' if event else 'Create' }} Event</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow border-0">
+                <div class="card-header bg-dark text-white text-center">
+                    <h4>{{ 'Edit Event' if event else 'Create New Event' }}</h4>
+                </div>
+                <div class="card-body bg-white">
+                    <form method="POST">
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-primary">Event Name</label>
+                            <input type="text" name="name" class="form-control" value="{{ event.name if event else '' }}" required>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Date & Time</label>
+                                <input type="datetime-local" name="date_time" class="form-control" value="{{ event.date_time if event else '' }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Duration (e.g., 3 Hours)</label>
+                                <input type="text" name="duration" class="form-control" value="{{ event.duration if event else '' }}" required>
+                            </div>
+                        </div>
+
+                        <div class="p-3 mb-3 bg-light border rounded">
+                            <h6 class="fw-bold text-primary mb-3">Location Details</h6>
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <label class="form-label">State</label>
+                                    <select name="state" class="form-select" required>
+                                        {% for state in data.states %}
+                                        <option value="{{ state }}" {% if event and event.state == state %}selected{% endif %}>{{ state }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">City/District</label>
+                                    <select name="city" class="form-select" required>
+                                        {% for city in data.cities %}
+                                        <option value="{{ city }}" {% if event and event.city == city %}selected{% endif %}>{{ city }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Local Area</label>
+                                    <select name="area" class="form-select" required>
+                                        {% for area in data.areas %}
+                                        <option value="{{ area }}" {% if event and event.area == area %}selected{% endif %}>{{ area }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="form-label">Specific Venue Name (e.g., Arnala Beach Resort)</label>
+                                <input type="text" name="location" class="form-control" value="{{ event.location if event else '' }}" required>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Price (₹)</label>
+                                <input type="number" step="0.01" name="price" class="form-control" value="{{ event.price if event else '' }}" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Total Seats</label>
+                                <input type="number" name="total_seats" class="form-control" value="{{ event.total_seats if event else '' }}" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold text-warning">Admin Rating (0-5) ⭐</label>
+                                <input type="number" step="0.1" min="0" max="5" name="rating" class="form-control" value="{{ event.rating if event else '4.5' }}" required>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Organizer Name</label>
+                                <input type="text" name="organizer_name" class="form-control" value="{{ event.organizer_name if event else '' }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Contact Email</label>
+                                <input type="email" name="contact_email" class="form-control" value="{{ event.contact_email if event else '' }}" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Genres (Hold Ctrl to select multiple)</label>
+                            <select name="genre" class="form-control" multiple required style="height: 100px;">
+                                {% for genre in data.genres %}
+                                    <option value="{{ genre }}" {% if event and genre in event.genre %}selected{% endif %}>{{ genre }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Cover Image URL</label>
+                            <input type="url" name="image_url" class="form-control" value="{{ event.image_url if event else '' }}">
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Description</label>
+                            <textarea name="description" class="form-control" rows="3" required>{{ event.description if event else '' }}</textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 fw-bold shadow-sm">{{ 'Update Event' if event else 'Save New Event' }}</button>
+                        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-link text-muted w-100 mt-2 text-decoration-none">Cancel</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
